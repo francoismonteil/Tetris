@@ -17,6 +17,13 @@ document.addEventListener("DOMContentLoaded", function() {
     let imagesLoaded = 0;
     let allImagesLoaded = false; // Indicateur pour vérifier si toutes les images sont chargées
 
+    function fetchInitialGameState() {
+        fetch('/gameState')
+            .then(response => response.json())
+            .then(updateGameState)
+            .catch(error => console.error("Error loading initial game state:", error));
+    }
+
     pieceTypes.forEach(type => {
         const img = new Image();
         img.src = `/images/${type}.png`;
@@ -123,13 +130,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function fetchInitialGameState() {
-        fetch('/gameState')
-            .then(response => response.json())
-            .then(updateGameState)
-            .catch(error => console.error("Error loading initial game state:", error));
-    }
-
     function checkCollision(tetromino, board) {
         const { shape, x, y } = tetromino;
 
@@ -205,49 +205,51 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     // Définir les fonctions dans le contexte global
-    window.moveDown = function() {
+    window.moveDown = async function() {
         if (isLocked) return;
         const targetY = gameState.currentTetromino.y + 1;
         if (!checkCollision({ ...gameState.currentTetromino, y: targetY }, gameState.gameBoard)) {
-            animateTetromino(gameState.currentTetromino, gameState.currentTetromino.x, targetY, 100, () => {
-                sendAction('/moveDown', moveSound);
+            animateTetromino(gameState.currentTetromino, gameState.currentTetromino.x, targetY, 100, async () => {
+                await sendAction('/moveDown', moveSound);
             });
         } else {
             // Verrouiller la pièce si elle atteint le bas ou un autre bloc
             lockTetromino(gameState.currentTetromino, gameState.gameBoard);
             isLocked = true;
-            sendAction('/lock', null);
+            await sendAction('/lock', null);
         }
     };
 
-    window.moveLeft = function() {
+    window.moveLeft = async function() {
         if (isLocked) return;
         const targetX = gameState.currentTetromino.x - 1;
         if (!checkCollision({ ...gameState.currentTetromino, x: targetX }, gameState.gameBoard)) {
-            animateTetromino(gameState.currentTetromino, targetX, gameState.currentTetromino.y, 100, () => {
-                sendAction('/moveLeft', moveSound);
+            animateTetromino(gameState.currentTetromino, targetX, gameState.currentTetromino.y, 100, async () => {
+                await sendAction('/moveLeft', moveSound);
             });
         }
     };
 
-    window.moveRight = function() {
+    window.moveRight = async function() {
         if (isLocked) return;
         const targetX = gameState.currentTetromino.x + 1;
         if (!checkCollision({ ...gameState.currentTetromino, x: targetX }, gameState.gameBoard)) {
-            animateTetromino(gameState.currentTetromino, targetX, gameState.currentTetromino.y, 100, () => {
-                sendAction('/moveRight', moveSound);
+            animateTetromino(gameState.currentTetromino, targetX, gameState.currentTetromino.y, 100, async () => {
+                await sendAction('/moveRight', moveSound);
             });
         }
     };
 
-    window.rotate = function() {
+    window.rotate = async function() {
         if (isLocked) return;
         // Vérifier les collisions pour la rotation ici si nécessaire
-        sendAction('/rotate', rotateSound);
+        await sendAction('/rotate', rotateSound);
     };
 
     function dropPiece() {
-        moveDown();
+        if (!isLocked) {
+            window.moveDown();
+        }
         dropTimeout = setTimeout(dropPiece, dropInterval);
     }
 
@@ -281,4 +283,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Charger l'état initial du jeu
     fetchInitialGameState();
+    // Commencer la chute des pièces
+    dropPiece();
 });
