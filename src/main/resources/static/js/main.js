@@ -66,7 +66,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     window.rotate = controls.rotate.bind(controls);
     window.toggleMusic = controls.toggleMusic.bind(controls);
 
-    // Implémentation de la fonction restartGame
     window.restartGame = async function() {
         try {
             const response = await fetch('/restart', { method: 'POST' });

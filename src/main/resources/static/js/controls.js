@@ -1,9 +1,8 @@
-import { GameState } from './gameState.js';
-
 export class Controls {
     constructor(gameState, sounds) {
         this.gameState = gameState;
         this.sounds = sounds;
+        this.isMuted = false; // Ajoutez une variable pour suivre l'état muet
     }
 
     setupEventListeners() {
@@ -27,8 +26,6 @@ export class Controls {
                     break;
             }
         });
-
-        document.getElementById('toggle-music').addEventListener('click', this.toggleMusic.bind(this));
     }
 
     async moveDown() {
@@ -77,13 +74,17 @@ export class Controls {
     }
 
     toggleMusic() {
+        this.isMuted = !this.isMuted; // Inverser l'état muet
         const toggleMusicButton = document.getElementById('toggle-music');
-        if (this.sounds.backgroundMusic.paused) {
-            this.sounds.backgroundMusic.play();
-            toggleMusicButton.textContent = 'Mute Music';
-        } else {
+        console.log("toggleMusic called. isMuted:", this.isMuted); // Débogage
+        if (this.isMuted) {
+            console.log("Muting music"); // Débogage
             this.sounds.backgroundMusic.pause();
             toggleMusicButton.textContent = 'Unmute Music';
+        } else {
+            console.log("Unmuting music"); // Débogage
+            this.sounds.backgroundMusic.play();
+            toggleMusicButton.textContent = 'Mute Music';
         }
     }
 }
