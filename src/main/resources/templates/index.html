@@ -26,12 +26,11 @@
         <button type="button" onclick="moveRight()">Move Right</button>
         <button type="button" onclick="rotate()">Rotate</button>
         <button type="button" id="toggle-music" onclick="toggleMusic()">Mute Music</button>
+        <button type="button" onclick="restartGame()">Restart</button>
     </div>
     <div id="game-over" style="display: none;">
         <p>Game Over!</p>
-        <form action="/restart" method="post">
-            <button type="submit">Restart</button>
-        </form>
+        <button type="button" onclick="restartGame()">Restart</button>
     </div>
 </div>
 </body>

@@ -65,4 +65,18 @@ document.addEventListener("DOMContentLoaded", async function() {
     window.moveRight = controls.moveRight.bind(controls);
     window.rotate = controls.rotate.bind(controls);
     window.toggleMusic = controls.toggleMusic.bind(controls);
+
+    // Implémentation de la fonction restartGame
+    window.restartGame = async function() {
+        try {
+            const response = await fetch('/restart', { method: 'POST' });
+            if (response.ok) {
+                const newGameState = await response.json();
+                gameState.updateGameState(newGameState);
+                document.getElementById('game-over').style.display = 'none';
+            }
+        } catch (error) {
+            console.error("Error restarting game:", error);
+        }
+    };
 });
