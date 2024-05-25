@@ -3,10 +3,14 @@ package fr.asser.tetris;
 
 import fr.asser.tetris.model.GameBoard;
 import fr.asser.tetris.model.Tetromino;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TetrisService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TetrisService.class);
 
     private GameBoard gameBoard;
     private Tetromino currentTetromino;
@@ -136,6 +140,7 @@ public class TetrisService {
     }
 
     public void restartGame() {
+        logger.info("Restarting game");
         gameBoard = new GameBoard();
         currentTetromino = new Tetromino();
         gameOver = false;
