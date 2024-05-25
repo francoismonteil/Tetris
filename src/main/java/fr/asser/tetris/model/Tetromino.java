@@ -5,29 +5,17 @@ public class Tetromino {
     private int[][] shape;
     private int x;
     private int y;
+    private String type;
     private int rotationIndex;
 
-    // Liste des rotations pour chaque type de tétrimino
-    private static final int[][][] SHAPES = {
-            // I
-            {{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-            // J
-            {{1, 0, 0}, {1, 1, 1}, {0, 0, 0}},
-            // L
-            {{0, 0, 1}, {1, 1, 1}, {0, 0, 0}},
-            // O
-            {{1, 1}, {1, 1}},
-            // S
-            {{0, 1, 1}, {1, 1, 0}, {0, 0, 0}},
-            // T
-            {{0, 1, 0}, {1, 1, 1}, {0, 0, 0}},
-            // Z
-            {{1, 1, 0}, {0, 1, 1}, {0, 0, 0}}};
+    private static final String[] TYPES = {"I", "J", "L", "O", "S", "T", "Z"};
+    private static final int[][][] SHAPES = {{{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}, {{1, 0, 0}, {1, 1, 1}, {0, 0, 0}}, {{0, 0, 1}, {1, 1, 1}, {0, 0, 0}}, {{1, 1}, {1, 1}}, {{0, 1, 1}, {1, 1, 0}, {0, 0, 0}}, {{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}, {{1, 1, 0}, {0, 1, 1}, {0, 0, 0}}};
 
     public Tetromino() {
         this.rotationIndex = 0;
-        int type = (int) (Math.random() * SHAPES.length);
-        this.shape = SHAPES[type];
+        int typeIndex = (int) (Math.random() * SHAPES.length);
+        this.shape = SHAPES[typeIndex];
+        this.type = TYPES[typeIndex];
         this.x = 3;
         this.y = 0;
     }
@@ -50,6 +38,10 @@ public class Tetromino {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public void rotate() {

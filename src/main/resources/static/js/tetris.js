@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const pieceTypes = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
 
     let imagesLoaded = 0;
+    let allImagesLoaded = false; // Indicateur pour vérifier si toutes les images sont chargées
 
     pieceTypes.forEach(type => {
         const img = new Image();
@@ -22,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
         img.onload = () => {
             imagesLoaded++;
             if (imagesLoaded === pieceTypes.length) {
-                // Toutes les images sont chargées
+                allImagesLoaded = true; // Toutes les images sont chargées
                 fetchInitialGameState();
             }
         };
@@ -49,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         // Dessiner la pièce courante
-        if (tetromino) {
+        if (tetromino && allImagesLoaded) { // Vérifier si toutes les images sont chargées
             const shape = tetromino.shape;
             const type = tetromino.type;
             const posX = tetromino.x;
@@ -58,7 +59,12 @@ document.addEventListener("DOMContentLoaded", function() {
             for (let i = 0; i < shape.length; i++) {
                 for (let j = 0; j < shape[i].length; j++) {
                     if (shape[i][j] !== 0) {
-                        context.drawImage(images[type], (posX + j) * blockSize, (posY + i) * blockSize, blockSize, blockSize);
+                        const img = images[type];
+                        if (img) { // Vérifiez que l'image existe avant de l'utiliser
+                            context.drawImage(img, (posX + j) * blockSize, (posY + i) * blockSize, blockSize, blockSize);
+                        } else {
+                            console.error(`Image for type ${type} not found`);
+                        }
                     }
                 }
             }
