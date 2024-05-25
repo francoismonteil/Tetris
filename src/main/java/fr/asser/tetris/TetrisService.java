@@ -33,6 +33,7 @@ public class TetrisService {
     }
 
     public void moveTetrominoDown() {
+        logger.info("Moving tetromino down");
         if (!moveTetromino(currentTetromino.getX(), currentTetromino.getY() + 1)) {
             lockTetromino();
             clearLines();
@@ -41,14 +42,17 @@ public class TetrisService {
     }
 
     public void moveTetrominoLeft() {
+        logger.info("Moving tetromino left");
         moveTetromino(currentTetromino.getX() - 1, currentTetromino.getY());
     }
 
     public void moveTetrominoRight() {
+        logger.info("Moving tetromino right");
         moveTetromino(currentTetromino.getX() + 1, currentTetromino.getY());
     }
 
     public void rotateTetromino() {
+        logger.info("Rotating tetromino");
         currentTetromino.rotate();
         if (checkCollision(currentTetromino.getX(), currentTetromino.getY())) {
             currentTetromino.rotateBack();
@@ -65,6 +69,7 @@ public class TetrisService {
     }
 
     public void lockTetromino() {
+        logger.info("Locking tetromino");
         gameBoard.placeTetromino(currentTetromino);
 
         if (currentTetromino.getY() < 0) {
@@ -73,10 +78,12 @@ public class TetrisService {
     }
 
     public void clearLines() {
+        logger.info("Clearing lines");
         gameBoard.clearLines();
     }
 
     public void generateNewTetromino() {
+        logger.info("Generating new tetromino");
         currentTetromino = new Tetromino();
         if (checkCollision(currentTetromino.getX(), currentTetromino.getY())) {
             gameOver = true;
