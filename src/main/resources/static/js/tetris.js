@@ -7,14 +7,9 @@ class Tetromino {
     }
 
     rotate() {
-        const newShape = [];
-        for (let y = 0; y < this.shape.length; y++) {
-            newShape[y] = [];
-            for (let x = 0; x < this.shape[y].length; x++) {
-                newShape[y][x] = this.shape[this.shape.length - 1 - x][y];
-            }
-        }
-        this.shape = newShape;
+        this.shape = this.shape[0].map((val, index) =>
+            this.shape.map(row => row[index]).reverse()
+        );
     }
 }
 
@@ -22,20 +17,35 @@ document.addEventListener("DOMContentLoaded", function() {
     const canvas = document.getElementById('game-board');
     const context = canvas.getContext('2d');
     const blockSize = 30;
-
-    const moveSound = new Audio('/sounds/move.mp3');
-    const rotateSound = new Audio('/sounds/rotate.mp3');
-    const lineClearSound = new Audio('/sounds/line-clear.mp3');
-    const backgroundMusic = new Audio('/sounds/background.mp3');
-    backgroundMusic.loop = true;
-    backgroundMusic.play();
+    const sounds = {
+        move: new Audio('/sounds/move.mp3'),
+        rotate: new Audio('/sounds/rotate.mp3'),
+        lineClear: new Audio('/sounds/line-clear.mp3'),
+        backgroundMusic: new Audio('/sounds/background.mp3'),
+    };
+    sounds.backgroundMusic.loop = true;
+    sounds.backgroundMusic.play();
 
     const images = {};
     const pieceTypes = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
-
     let imagesLoaded = 0;
-    let allImagesLoaded = false;
     let isGameStarted = false;
+    let dropInterval = 1000;
+    let dropTimeout;
+    let gameState = {};
+    let isLocked = false;
+
+    function preloadImages() {
+        return Promise.all(pieceTypes.map(type => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = `/images/${type}.png`;
+                img.onload = resolve;
+                img.onerror = reject;
+                images[type] = img;
+            });
+        }));
+    }
 
     function fetchInitialGameState() {
         fetch('/gameState')
@@ -47,66 +57,43 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(error => console.error("Error loading initial game state:", error));
     }
 
-    pieceTypes.forEach(type => {
-        const img = new Image();
-        img.src = `/images/${type}.png`;
-        img.onload = () => {
-            imagesLoaded++;
-            if (imagesLoaded === pieceTypes.length) {
-                allImagesLoaded = true;
-            }
-        };
-        images[type] = img;
-    });
-
-    let dropInterval = 1000;
-    let dropTimeout;
-    let gameState = {};
-    let isLocked = false;
-
-    function initializeTetromino(gameState) {
-        if (gameState.currentTetromino) {
-            gameState.currentTetromino = new Tetromino(
-                gameState.currentTetromino.type,
-                gameState.currentTetromino.shape,
-                gameState.currentTetromino.x,
-                gameState.currentTetromino.y
+    function initializeTetromino(state) {
+        if (state.currentTetromino) {
+            state.currentTetromino = new Tetromino(
+                state.currentTetromino.type,
+                state.currentTetromino.shape,
+                state.currentTetromino.x,
+                state.currentTetromino.y
             );
         }
     }
 
     function drawBoard(board, tetromino) {
         context.clearRect(0, 0, canvas.width, canvas.height);
-
-        for (let y = 0; y < board.length; y++) {
-            for (let x = 0; x < board[y].length; x++) {
-                if (board[y][x] !== 0) {
+        board.forEach((row, y) => {
+            row.forEach((cell, x) => {
+                if (cell !== 0) {
                     context.fillStyle = 'gray';
                     context.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
                     context.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
                 }
-            }
+            });
+        });
+        if (tetromino) {
+            drawTetromino(tetromino);
         }
+    }
 
-        if (tetromino && allImagesLoaded) {
-            const shape = tetromino.shape;
-            const type = tetromino.type;
-            const posX = tetromino.x;
-            const posY = tetromino.y;
-
-            for (let i = 0; i < shape.length; i++) {
-                for (let j = 0; j < shape[i].length; j++) {
-                    if (shape[i][j] !== 0) {
-                        const img = images[type];
-                        if (img) {
-                            context.drawImage(img, (posX + j) * blockSize, (posY + i) * blockSize, blockSize, blockSize);
-                        } else {
-                            console.error(`Image for type ${type} not found`);
-                        }
-                    }
+    function drawTetromino(tetromino) {
+        const { shape, type, x, y } = tetromino;
+        shape.forEach((row, i) => {
+            row.forEach((cell, j) => {
+                if (cell !== 0) {
+                    const img = images[type];
+                    context.drawImage(img, (x + j) * blockSize, (y + i) * blockSize, blockSize, blockSize);
                 }
-            }
-        }
+            });
+        });
     }
 
     function updateGameState(newGameState) {
@@ -114,37 +101,28 @@ document.addEventListener("DOMContentLoaded", function() {
         gameState = newGameState;
         isLocked = false;
         drawBoard(gameState.gameBoard, gameState.currentTetromino);
+        updateUI(newGameState);
+        if (gameState.gameOver) {
+            handleGameOver();
+        } else {
+            resetDropInterval(gameState.level);
+        }
+    }
 
+    function updateUI(state) {
         const scoreElem = document.getElementById('score');
         const levelElem = document.getElementById('level');
         const controlsElem = document.getElementById('controls');
         const gameOverElem = document.getElementById('game-over');
 
-        if (scoreElem) {
-            scoreElem.textContent = gameState.score;
-        }
+        scoreElem.textContent = state.score;
+        levelElem.textContent = state.level;
+        controlsElem.style.display = state.gameOver ? 'none' : 'block';
+        gameOverElem.style.display = state.gameOver ? 'block' : 'none';
+    }
 
-        if (levelElem) {
-            levelElem.textContent = gameState.level;
-        }
-
-        if (gameState.gameOver) {
-            if (controlsElem) {
-                controlsElem.style.display = 'none';
-            }
-            if (gameOverElem) {
-                gameOverElem.style.display = 'block';
-            }
-            clearTimeout(dropTimeout);
-        } else {
-            if (controlsElem) {
-                controlsElem.style.display = 'block';
-            }
-            if (gameOverElem) {
-                gameOverElem.style.display = 'none';
-            }
-            resetDropInterval(gameState.level);
-        }
+    function handleGameOver() {
+        clearTimeout(dropTimeout);
     }
 
     async function sendAction(action, sound) {
@@ -153,9 +131,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (response.ok) {
                 const newGameState = await response.json();
                 initializeTetromino(newGameState);
-                if (sound) {
-                    sound.play();
-                }
+                if (sound) sound.play();
                 updateGameState(newGameState);
             }
         } catch (error) {
@@ -164,37 +140,31 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function checkCollision(tetromino, board) {
-        const { shape, x, y } = tetromino;
-
-        for (let i = 0; i < shape.length; i++) {
-            for (let j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] !== 0) {
-                    const newX = x + j;
-                    const newY = y + i;
-                    if (
+        return tetromino.shape.some((row, i) =>
+            row.some((cell, j) => {
+                if (cell !== 0) {
+                    const newX = tetromino.x + j;
+                    const newY = tetromino.y + i;
+                    return (
                         newX < 0 ||
                         newX >= board[0].length ||
                         newY >= board.length ||
                         (board[newY] && board[newY][newX] !== 0)
-                    ) {
-                        return true;
-                    }
+                    );
                 }
-            }
-        }
-        return false;
+                return false;
+            })
+        );
     }
 
     function lockTetromino(tetromino, board) {
-        const { shape, x, y } = tetromino;
-
-        for (let i = 0; i < shape.length; i++) {
-            for (let j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] !== 0) {
-                    board[y + i][x + j] = shape[i][j];
+        tetromino.shape.forEach((row, i) => {
+            row.forEach((cell, j) => {
+                if (cell !== 0) {
+                    board[tetromino.y + i][tetromino.x + j] = cell;
                 }
-            }
-        }
+            });
+        });
     }
 
     function animateTetromino(tetromino, targetX, targetY, duration, callback) {
@@ -205,8 +175,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const startTime = Date.now();
 
         function animate() {
-            const currentTime = Date.now();
-            const elapsedTime = currentTime - startTime;
+            const elapsedTime = Date.now() - startTime;
             const progress = Math.min(elapsedTime / duration, 1);
 
             tetromino.x = startX + deltaX * progress;
@@ -228,62 +197,58 @@ document.addEventListener("DOMContentLoaded", function() {
 
     window.toggleMusic = function() {
         const toggleMusicButton = document.getElementById('toggle-music');
-        if (backgroundMusic.paused) {
-            backgroundMusic.play();
+        if (sounds.backgroundMusic.paused) {
+            sounds.backgroundMusic.play();
             toggleMusicButton.textContent = 'Mute Music';
         } else {
-            backgroundMusic.pause();
+            sounds.backgroundMusic.pause();
             toggleMusicButton.textContent = 'Unmute Music';
         }
     };
 
     window.moveDown = async function() {
-        if (isLocked || !isGameStarted) return;
-        if (!gameState.currentTetromino) return;
+        if (isLocked || !isGameStarted || !gameState.currentTetromino) return;
         const targetY = gameState.currentTetromino.y + 1;
         if (!checkCollision({ ...gameState.currentTetromino, y: targetY }, gameState.gameBoard)) {
             gameState.currentTetromino.y = targetY;
             drawBoard(gameState.gameBoard, gameState.currentTetromino);
-            await sendAction('/moveDown', moveSound);
+            await sendAction('/moveDown', sounds.move);
         } else {
             lockTetromino(gameState.currentTetromino, gameState.gameBoard);
             isLocked = true;
-            await sendAction('/lock', null);
+            await sendAction('/lock');
         }
     };
 
     window.moveLeft = async function() {
-        if (isLocked || !isGameStarted) return;
-        if (!gameState.currentTetromino) return;
+        if (isLocked || !isGameStarted || !gameState.currentTetromino) return;
         const targetX = gameState.currentTetromino.x - 1;
         if (!checkCollision({ ...gameState.currentTetromino, x: targetX }, gameState.gameBoard)) {
             gameState.currentTetromino.x = targetX;
             drawBoard(gameState.gameBoard, gameState.currentTetromino);
-            await sendAction('/moveLeft', moveSound);
+            await sendAction('/moveLeft', sounds.move);
         }
     };
 
     window.moveRight = async function() {
-        if (isLocked || !isGameStarted) return;
-        if (!gameState.currentTetromino) return;
+        if (isLocked || !isGameStarted || !gameState.currentTetromino) return;
         const targetX = gameState.currentTetromino.x + 1;
         if (!checkCollision({ ...gameState.currentTetromino, x: targetX }, gameState.gameBoard)) {
             gameState.currentTetromino.x = targetX;
             drawBoard(gameState.gameBoard, gameState.currentTetromino);
-            await sendAction('/moveRight', moveSound);
+            await sendAction('/moveRight', sounds.move);
         }
     };
 
     window.rotate = async function() {
-        if (isLocked || !isGameStarted) return;
-        if (!gameState.currentTetromino) return;
+        if (isLocked || !isGameStarted || !gameState.currentTetromino) return;
         const originalShape = gameState.currentTetromino.shape;
         gameState.currentTetromino.rotate();
         if (checkCollision(gameState.currentTetromino, gameState.gameBoard)) {
             gameState.currentTetromino.shape = originalShape;
         }
         drawBoard(gameState.gameBoard, gameState.currentTetromino);
-        await sendAction('/rotate', rotateSound);
+        await sendAction('/rotate', sounds.rotate);
     };
 
     function dropPiece() {
@@ -300,8 +265,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     document.addEventListener("keydown", function(event) {
-        const gameOverElem = document.getElementById('game-over');
-        if (gameOverElem && gameOverElem.style.display === 'block') {
+        if (document.getElementById('game-over').style.display === 'block') {
             return;
         }
 
@@ -330,4 +294,8 @@ document.addEventListener("DOMContentLoaded", function() {
             dropPiece();
         }
     };
+
+    preloadImages().then(fetchInitialGameState).catch(error => {
+        console.error("Error loading images:", error);
+    });
 });
