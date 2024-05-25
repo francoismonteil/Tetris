@@ -3,7 +3,6 @@ package fr.asser.tetris;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.asser.tetris.model.GameBoard;
 import fr.asser.tetris.model.Tetromino;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,62 +26,67 @@ public class TetrisController {
 
     @GetMapping("/gameState")
     @ResponseBody
-    public String getGameState() throws JsonProcessingException {
+    public String getGameState() {
         return getCurrentGameState();
     }
 
     @PostMapping("/moveDown")
     @ResponseBody
-    public String moveDown() throws JsonProcessingException {
-        tetrisService.moveTetrominoDown();
-        return getCurrentGameState();
+    public String moveDown() {
+        return handleGameAction(() -> tetrisService.moveTetrominoDown());
     }
 
     @PostMapping("/moveLeft")
     @ResponseBody
-    public String moveLeft() throws JsonProcessingException {
-        tetrisService.moveTetrominoLeft();
-        return getCurrentGameState();
+    public String moveLeft() {
+        return handleGameAction(() -> tetrisService.moveTetrominoLeft());
     }
 
     @PostMapping("/moveRight")
     @ResponseBody
-    public String moveRight() throws JsonProcessingException {
-        tetrisService.moveTetrominoRight();
-        return getCurrentGameState();
+    public String moveRight() {
+        return handleGameAction(() -> tetrisService.moveTetrominoRight());
     }
 
     @PostMapping("/rotate")
     @ResponseBody
-    public String rotate() throws JsonProcessingException {
-        tetrisService.rotateTetromino();
-        return getCurrentGameState();
+    public String rotate() {
+        return handleGameAction(() -> tetrisService.rotateTetromino());
     }
 
     @PostMapping("/lock")
     @ResponseBody
-    public String lock() throws JsonProcessingException {
-        tetrisService.lockTetromino();
-        tetrisService.clearLines();
-        tetrisService.generateNewTetromino();
-        return getCurrentGameState();
+    public String lock() {
+        return handleGameAction(() -> {
+            tetrisService.lockTetromino();
+            tetrisService.clearLines();
+            tetrisService.generateNewTetromino();
+        });
     }
 
     @PostMapping("/restart")
     @ResponseBody
-    public String restart() throws JsonProcessingException {
-        tetrisService.restartGame();
+    public String restart() {
+        return handleGameAction(() -> tetrisService.restartGame());
+    }
+
+    private String handleGameAction(Runnable gameAction) {
+        gameAction.run();
         return getCurrentGameState();
     }
 
-    private String getCurrentGameState() throws JsonProcessingException {
-        return objectMapper.writeValueAsString(new GameState(
-                tetrisService.getGameBoard().getBoard(),
-                tetrisService.getCurrentTetromino(),
-                tetrisService.getGameBoard().getScore(),
-                tetrisService.getGameBoard().getLevel(),
-                tetrisService.isGameOver()
-        ));
+    private String getCurrentGameState() {
+        try {
+            return objectMapper.writeValueAsString(new GameState(
+                    tetrisService.getGameBoard().getBoard(),
+                    tetrisService.getCurrentTetromino(),
+                    tetrisService.getGameBoard().getScore(),
+                    tetrisService.getGameBoard().getLevel(),
+                    tetrisService.isGameOver()
+            ));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error processing JSON", e);
+        }
     }
 
     private static class GameState {

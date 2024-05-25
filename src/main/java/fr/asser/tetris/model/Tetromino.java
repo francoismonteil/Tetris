@@ -9,15 +9,26 @@ public class Tetromino {
     private int rotationIndex;
 
     private static final String[] TYPES = {"I", "J", "L", "O", "S", "T", "Z"};
-    private static final int[][][] SHAPES = {{{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}, {{1, 0, 0}, {1, 1, 1}, {0, 0, 0}}, {{0, 0, 1}, {1, 1, 1}, {0, 0, 0}}, {{1, 1}, {1, 1}}, {{0, 1, 1}, {1, 1, 0}, {0, 0, 0}}, {{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}, {{1, 1, 0}, {0, 1, 1}, {0, 0, 0}}};
+    private static final int[][][] SHAPES = {
+            {{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
+            {{1, 0, 0}, {1, 1, 1}, {0, 0, 0}},
+            {{0, 0, 1}, {1, 1, 1}, {0, 0, 0}},
+            {{1, 1}, {1, 1}},
+            {{0, 1, 1}, {1, 1, 0}, {0, 0, 0}},
+            {{0, 1, 0}, {1, 1, 1}, {0, 0, 0}},
+            {{1, 1, 0}, {0, 1, 1}, {0, 0, 0}}
+    };
+
+    private static final int INITIAL_X = 3;
+    private static final int INITIAL_Y = 0;
 
     public Tetromino() {
         this.rotationIndex = 0;
         int typeIndex = (int) (Math.random() * SHAPES.length);
         this.shape = SHAPES[typeIndex];
         this.type = TYPES[typeIndex];
-        this.x = 3;
-        this.y = 0;
+        this.x = INITIAL_X;
+        this.y = INITIAL_Y;
     }
 
     public int[][] getShape() {
@@ -45,24 +56,32 @@ public class Tetromino {
     }
 
     public void rotate() {
-        int n = shape.length;
-        int[][] rotatedShape = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                rotatedShape[j][n - 1 - i] = shape[i][j];
-            }
-        }
-        shape = rotatedShape;
+        shape = rotateMatrix(shape);
     }
 
     public void rotateBack() {
-        int n = shape.length;
-        int[][] rotatedShape = new int[n][n];
+        shape = rotateMatrixCounterClockwise(shape);
+    }
+
+    private int[][] rotateMatrix(int[][] matrix) {
+        int n = matrix.length;
+        int[][] rotatedMatrix = new int[n][n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                rotatedShape[i][j] = shape[j][n - 1 - i];
+                rotatedMatrix[j][n - 1 - i] = matrix[i][j];
             }
         }
-        shape = rotatedShape;
+        return rotatedMatrix;
+    }
+
+    private int[][] rotateMatrixCounterClockwise(int[][] matrix) {
+        int n = matrix.length;
+        int[][] rotatedMatrix = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                rotatedMatrix[i][j] = matrix[j][n - 1 - i];
+            }
+        }
+        return rotatedMatrix;
     }
 }

@@ -11,9 +11,7 @@ public class GameBoard {
 
     // Constructor sans argument
     public GameBoard() {
-        this.board = new int[20][10];
-        this.score = 0;
-        this.level = 1;
+        this(20, 10);
     }
 
     public GameBoard(int rows, int cols) {
@@ -47,8 +45,7 @@ public class GameBoard {
                 if (shape[i][j] != 0) {
                     int newX = x + j;
                     int newY = y + i;
-
-                    if (newX < 0 || newX >= cols || newY < 0 || newY >= rows || board[newY][newX] != 0) {
+                    if (isOutOfBounds(newX, newY) || board[newY][newX] != 0) {
                         return false;
                     }
                 }
@@ -74,20 +71,10 @@ public class GameBoard {
     public void clearLines() {
         int linesClearedInThisStep = 0;
         for (int i = rows - 1; i >= 0; i--) {
-            boolean fullLine = true;
-            for (int j = 0; j < cols; j++) {
-                if (board[i][j] == 0) {
-                    fullLine = false;
-                    break;
-                }
-            }
-            if (fullLine) {
-                for (int k = i; k > 0; k--) {
-                    board[k] = board[k - 1];
-                }
-                board[0] = new int[cols];
+            if (isLineComplete(i)) {
+                clearLine(i);
                 linesClearedInThisStep++;
-                i++;
+                i++;  // Recheck the same line after clearing
             }
         }
 
@@ -96,6 +83,26 @@ public class GameBoard {
             score += calculateScore(linesClearedInThisStep);
             level = 1 + linesCleared / 10;
         }
+    }
+
+    private boolean isOutOfBounds(int x, int y) {
+        return x < 0 || x >= cols || y < 0 || y >= rows;
+    }
+
+    private boolean isLineComplete(int row) {
+        for (int j = 0; j < cols; j++) {
+            if (board[row][j] == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void clearLine(int row) {
+        for (int k = row; k > 0; k--) {
+            board[k] = board[k - 1];
+        }
+        board[0] = new int[cols];
     }
 
     private int calculateScore(int lines) {
