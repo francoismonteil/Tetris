@@ -2,12 +2,14 @@ package fr.asser.tetris.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.asser.tetris.model.GameBoard;
 import fr.asser.tetris.model.Tetromino;
 import fr.asser.tetris.service.TetrisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -70,6 +72,26 @@ public class TetrisController {
         return handleGameAction(tetrisService::restartGame);
     }
 
+    @PostMapping("/save")
+    @ResponseBody
+    public String saveGameState() {
+        return getCurrentGameState();
+    }
+
+    @PostMapping("/load")
+    @ResponseBody
+    public String loadGameState(@RequestBody String savedState) {
+        try {
+            GameState gameState = objectMapper.readValue(savedState, GameState.class);
+            tetrisService.setGameBoard(new GameBoard(gameState.gameBoard, gameState.score, gameState.level, gameState.linesCleared));
+            tetrisService.setCurrentTetromino(gameState.currentTetromino);
+            tetrisService.setGameOver(gameState.gameOver);
+            return getCurrentGameState();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error processing JSON", e);
+        }
+    }
+
     private String handleGameAction(Runnable gameAction) {
         gameAction.run();
         return getCurrentGameState();
@@ -82,6 +104,7 @@ public class TetrisController {
                     tetrisService.getCurrentTetromino(),
                     tetrisService.getGameBoard().getScore(),
                     tetrisService.getGameBoard().getLevel(),
+                    tetrisService.getGameBoard().getLinesCleared(),
                     tetrisService.isGameOver()
             ));
         } catch (JsonProcessingException e) {
@@ -94,13 +117,15 @@ public class TetrisController {
         public Tetromino currentTetromino;
         public int score;
         public int level;
+        public int linesCleared;
         public boolean gameOver;
 
-        public GameState(int[][] gameBoard, Tetromino currentTetromino, int score, int level, boolean gameOver) {
+        public GameState(int[][] gameBoard, Tetromino currentTetromino, int score, int level, int linesCleared, boolean gameOver) {
             this.gameBoard = gameBoard;
             this.currentTetromino = currentTetromino;
             this.score = score;
             this.level = level;
+            this.linesCleared = linesCleared;
             this.gameOver = gameOver;
         }
     }

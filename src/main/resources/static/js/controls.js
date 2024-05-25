@@ -28,6 +28,14 @@ export class Controls {
                 case "P":
                     this.togglePause();
                     break;
+                case "s":
+                case "S":
+                    this.saveGame();
+                    break;
+                case "l":
+                case "L":
+                    this.loadGame();
+                    break;
             }
         });
 
@@ -100,6 +108,41 @@ export class Controls {
         } else {
             this.gameState.resetDropInterval(this.gameState.gameState.level);
             togglePauseButton.textContent = 'Pause';
+        }
+    }
+
+    async saveGame() {
+        try {
+            const response = await fetch('/save', { method: 'POST' });
+            if (response.ok) {
+                const savedState = await response.json();
+                localStorage.setItem('tetrisGameState', JSON.stringify(savedState));
+                alert('Game saved successfully!');
+            }
+        } catch (error) {
+            console.error("Error saving game:", error);
+        }
+    }
+
+    async loadGame() {
+        try {
+            const savedState = JSON.parse(localStorage.getItem('tetrisGameState'));
+            if (savedState) {
+                const response = await fetch('/load', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(savedState)
+                });
+                if (response.ok) {
+                    const newGameState = await response.json();
+                    this.gameState.updateGameState(newGameState);
+                    alert('Game loaded successfully!');
+                }
+            } else {
+                alert('No saved game found.');
+            }
+        } catch (error) {
+            console.error("Error loading game:", error);
         }
     }
 }

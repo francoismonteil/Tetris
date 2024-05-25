@@ -31,6 +31,18 @@ public class TetrisService {
         return gameOver;
     }
 
+    public void setGameBoard(GameBoard gameBoard) {
+        this.gameBoard = gameBoard;
+    }
+
+    public void setCurrentTetromino(Tetromino currentTetromino) {
+        this.currentTetromino = currentTetromino;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
+
     public void moveTetrominoDown() {
         logger.info("Moving tetromino down");
         if (!moveTetromino(currentTetromino.getX(), currentTetromino.getY() + 1)) {

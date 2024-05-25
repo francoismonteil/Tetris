@@ -21,6 +21,15 @@ public class GameBoard {
         this.linesCleared = 0;
     }
 
+    public GameBoard(int[][] board, int score, int level, int linesCleared) {
+        this.rows = board.length;
+        this.cols = board[0].length;
+        this.board = board;
+        this.score = score;
+        this.level = level;
+        this.linesCleared = linesCleared;
+    }
+
     public int[][] getBoard() {
         return board;
     }
@@ -31,6 +40,10 @@ public class GameBoard {
 
     public int getLevel() {
         return level;
+    }
+
+    public int getLinesCleared() {
+        return linesCleared;
     }
 
     public boolean canPlaceTetromino(Tetromino tetromino) {
@@ -79,7 +92,7 @@ public class GameBoard {
         if (linesClearedInThisStep > 0) {
             linesCleared += linesClearedInThisStep;
             score += calculateScore(linesClearedInThisStep);
-            level = 1 + linesCleared / 10;
+            level = score / 100 + 1;
         }
     }
 

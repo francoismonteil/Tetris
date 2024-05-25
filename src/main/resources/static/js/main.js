@@ -67,6 +67,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     window.rotate = controls.rotate.bind(controls);
     window.toggleMusic = controls.toggleMusic.bind(controls);
     window.togglePause = controls.togglePause.bind(controls);
+    window.saveGame = controls.saveGame.bind(controls);
+    window.loadGame = controls.loadGame.bind(controls);
 
     window.restartGame = async function() {
         try {
