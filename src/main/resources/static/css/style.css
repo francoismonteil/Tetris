@@ -1,0 +1,24 @@
+/* src/main/resources/static/css/style.css */
+#game-board-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#game-board {
+    border: 1px solid black;
+    display: block;
+}
+
+#info-panel {
+    margin-left: 20px;
+}
+
+#controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#controls button {
+    margin: 5px;
+}
