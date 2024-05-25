@@ -59,4 +59,10 @@ document.addEventListener("DOMContentLoaded", async function() {
             gameState.dropPiece();
         }
     };
+
+    window.moveDown = controls.moveDown.bind(controls);
+    window.moveLeft = controls.moveLeft.bind(controls);
+    window.moveRight = controls.moveRight.bind(controls);
+    window.rotate = controls.rotate.bind(controls);
+    window.toggleMusic = controls.toggleMusic.bind(controls);
 });
