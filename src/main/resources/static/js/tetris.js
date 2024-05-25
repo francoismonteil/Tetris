@@ -1,4 +1,23 @@
-// src/main/resources/static/js/tetris.js
+class Tetromino {
+    constructor(type, shape, x, y) {
+        this.type = type;
+        this.shape = shape;
+        this.x = x;
+        this.y = y;
+    }
+
+    rotate() {
+        const newShape = [];
+        for (let y = 0; y < this.shape.length; y++) {
+            newShape[y] = [];
+            for (let x = 0; x < this.shape[y].length; x++) {
+                newShape[y][x] = this.shape[this.shape.length - 1 - x][y];
+            }
+        }
+        this.shape = newShape;
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const canvas = document.getElementById('game-board');
     const context = canvas.getContext('2d');
@@ -15,12 +34,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const pieceTypes = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
 
     let imagesLoaded = 0;
-    let allImagesLoaded = false; // Indicateur pour vérifier si toutes les images sont chargées
+    let allImagesLoaded = false;
+    let isGameStarted = false;
 
     function fetchInitialGameState() {
         fetch('/gameState')
             .then(response => response.json())
-            .then(updateGameState)
+            .then(newGameState => {
+                initializeTetromino(newGameState);
+                updateGameState(newGameState);
+            })
             .catch(error => console.error("Error loading initial game state:", error));
     }
 
@@ -30,22 +53,31 @@ document.addEventListener("DOMContentLoaded", function() {
         img.onload = () => {
             imagesLoaded++;
             if (imagesLoaded === pieceTypes.length) {
-                allImagesLoaded = true; // Toutes les images sont chargées
-                fetchInitialGameState();
+                allImagesLoaded = true;
             }
         };
         images[type] = img;
     });
 
-    let dropInterval = 1000; // Intervalle de descente par défaut en millisecondes
+    let dropInterval = 1000;
     let dropTimeout;
-    let gameState = {}; // Stocker l'état du jeu globalement
-    let isLocked = false; // Indicateur de verrouillage du tétrimino
+    let gameState = {};
+    let isLocked = false;
+
+    function initializeTetromino(gameState) {
+        if (gameState.currentTetromino) {
+            gameState.currentTetromino = new Tetromino(
+                gameState.currentTetromino.type,
+                gameState.currentTetromino.shape,
+                gameState.currentTetromino.x,
+                gameState.currentTetromino.y
+            );
+        }
+    }
 
     function drawBoard(board, tetromino) {
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Dessiner le plateau
         for (let y = 0; y < board.length; y++) {
             for (let x = 0; x < board[y].length; x++) {
                 if (board[y][x] !== 0) {
@@ -56,8 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
-        // Dessiner la pièce courante
-        if (tetromino && allImagesLoaded) { // Vérifier si toutes les images sont chargées
+        if (tetromino && allImagesLoaded) {
             const shape = tetromino.shape;
             const type = tetromino.type;
             const posX = tetromino.x;
@@ -67,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 for (let j = 0; j < shape[i].length; j++) {
                     if (shape[i][j] !== 0) {
                         const img = images[type];
-                        if (img) { // Vérifiez que l'image existe avant de l'utiliser
+                        if (img) {
                             context.drawImage(img, (posX + j) * blockSize, (posY + i) * blockSize, blockSize, blockSize);
                         } else {
                             console.error(`Image for type ${type} not found`);
@@ -79,8 +110,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateGameState(newGameState) {
+        initializeTetromino(newGameState);
         gameState = newGameState;
-        isLocked = false; // Réinitialiser l'indicateur de verrouillage
+        isLocked = false;
         drawBoard(gameState.gameBoard, gameState.currentTetromino);
 
         const scoreElem = document.getElementById('score');
@@ -120,6 +152,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const response = await fetch(action, { method: 'POST' });
             if (response.ok) {
                 const newGameState = await response.json();
+                initializeTetromino(newGameState);
                 if (sound) {
                     sound.play();
                 }
@@ -139,10 +172,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     const newX = x + j;
                     const newY = y + i;
                     if (
-                        newX < 0 || // Collision avec le mur gauche
-                        newX >= board[0].length || // Collision avec le mur droit
-                        newY >= board.length || // Collision avec le bas
-                        (board[newY] && board[newY][newX] !== 0) // Collision avec un autre bloc
+                        newX < 0 ||
+                        newX >= board[0].length ||
+                        newY >= board.length ||
+                        (board[newY] && board[newY][newX] !== 0)
                     ) {
                         return true;
                     }
@@ -193,27 +226,26 @@ document.addEventListener("DOMContentLoaded", function() {
         requestAnimationFrame(animate);
     }
 
-    // Fonction pour couper ou réactiver la musique de fond
     window.toggleMusic = function() {
+        const toggleMusicButton = document.getElementById('toggle-music');
         if (backgroundMusic.paused) {
             backgroundMusic.play();
-            document.getElementById('toggle-music').textContent = 'Mute Music';
+            toggleMusicButton.textContent = 'Mute Music';
         } else {
             backgroundMusic.pause();
-            document.getElementById('toggle-music').textContent = 'Unmute Music';
+            toggleMusicButton.textContent = 'Unmute Music';
         }
     };
 
-    // Définir les fonctions dans le contexte global
     window.moveDown = async function() {
-        if (isLocked) return;
+        if (isLocked || !isGameStarted) return;
+        if (!gameState.currentTetromino) return;
         const targetY = gameState.currentTetromino.y + 1;
         if (!checkCollision({ ...gameState.currentTetromino, y: targetY }, gameState.gameBoard)) {
-            animateTetromino(gameState.currentTetromino, gameState.currentTetromino.x, targetY, 100, async () => {
-                await sendAction('/moveDown', moveSound);
-            });
+            gameState.currentTetromino.y = targetY;
+            drawBoard(gameState.gameBoard, gameState.currentTetromino);
+            await sendAction('/moveDown', moveSound);
         } else {
-            // Verrouiller la pièce si elle atteint le bas ou un autre bloc
             lockTetromino(gameState.currentTetromino, gameState.gameBoard);
             isLocked = true;
             await sendAction('/lock', null);
@@ -221,33 +253,41 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     window.moveLeft = async function() {
-        if (isLocked) return;
+        if (isLocked || !isGameStarted) return;
+        if (!gameState.currentTetromino) return;
         const targetX = gameState.currentTetromino.x - 1;
         if (!checkCollision({ ...gameState.currentTetromino, x: targetX }, gameState.gameBoard)) {
-            animateTetromino(gameState.currentTetromino, targetX, gameState.currentTetromino.y, 100, async () => {
-                await sendAction('/moveLeft', moveSound);
-            });
+            gameState.currentTetromino.x = targetX;
+            drawBoard(gameState.gameBoard, gameState.currentTetromino);
+            await sendAction('/moveLeft', moveSound);
         }
     };
 
     window.moveRight = async function() {
-        if (isLocked) return;
+        if (isLocked || !isGameStarted) return;
+        if (!gameState.currentTetromino) return;
         const targetX = gameState.currentTetromino.x + 1;
         if (!checkCollision({ ...gameState.currentTetromino, x: targetX }, gameState.gameBoard)) {
-            animateTetromino(gameState.currentTetromino, targetX, gameState.currentTetromino.y, 100, async () => {
-                await sendAction('/moveRight', moveSound);
-            });
+            gameState.currentTetromino.x = targetX;
+            drawBoard(gameState.gameBoard, gameState.currentTetromino);
+            await sendAction('/moveRight', moveSound);
         }
     };
 
     window.rotate = async function() {
-        if (isLocked) return;
-        // Vérifier les collisions pour la rotation ici si nécessaire
+        if (isLocked || !isGameStarted) return;
+        if (!gameState.currentTetromino) return;
+        const originalShape = gameState.currentTetromino.shape;
+        gameState.currentTetromino.rotate();
+        if (checkCollision(gameState.currentTetromino, gameState.gameBoard)) {
+            gameState.currentTetromino.shape = originalShape;
+        }
+        drawBoard(gameState.gameBoard, gameState.currentTetromino);
         await sendAction('/rotate', rotateSound);
     };
 
     function dropPiece() {
-        if (!isLocked) {
+        if (!isLocked && gameState.currentTetromino) {
             window.moveDown();
         }
         dropTimeout = setTimeout(dropPiece, dropInterval);
@@ -255,14 +295,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function resetDropInterval(level) {
         clearTimeout(dropTimeout);
-        dropInterval = Math.max(1000 - (level - 1) * 100, 100); // Ajuster l'intervalle de descente
+        dropInterval = Math.max(1000 - (level - 1) * 100, 100);
         dropTimeout = setTimeout(dropPiece, dropInterval);
     }
 
     document.addEventListener("keydown", function(event) {
         const gameOverElem = document.getElementById('game-over');
         if (gameOverElem && gameOverElem.style.display === 'block') {
-            return; // Ne rien faire si le jeu est terminé
+            return;
         }
 
         switch (event.key) {
@@ -281,8 +321,13 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Charger l'état initial du jeu
-    fetchInitialGameState();
-    // Commencer la chute des pièces
-    dropPiece();
+    window.startGame = function() {
+        if (!isGameStarted) {
+            isGameStarted = true;
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            fetchInitialGameState();
+            dropPiece();
+        }
+    };
 });
