@@ -33,25 +33,25 @@ public class TetrisController {
     @PostMapping("/moveDown")
     @ResponseBody
     public String moveDown() {
-        return handleGameAction(() -> tetrisService.moveTetrominoDown());
+        return handleGameAction(tetrisService::moveTetrominoDown);
     }
 
     @PostMapping("/moveLeft")
     @ResponseBody
     public String moveLeft() {
-        return handleGameAction(() -> tetrisService.moveTetrominoLeft());
+        return handleGameAction(tetrisService::moveTetrominoLeft);
     }
 
     @PostMapping("/moveRight")
     @ResponseBody
     public String moveRight() {
-        return handleGameAction(() -> tetrisService.moveTetrominoRight());
+        return handleGameAction(tetrisService::moveTetrominoRight);
     }
 
     @PostMapping("/rotate")
     @ResponseBody
     public String rotate() {
-        return handleGameAction(() -> tetrisService.rotateTetromino());
+        return handleGameAction(tetrisService::rotateTetromino);
     }
 
     @PostMapping("/lock")
@@ -67,7 +67,7 @@ public class TetrisController {
     @PostMapping("/restart")
     @ResponseBody
     public String restart() {
-        return handleGameAction(() -> tetrisService.restartGame());
+        return handleGameAction(tetrisService::restartGame);
     }
 
     private String handleGameAction(Runnable gameAction) {

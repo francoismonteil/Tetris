@@ -9,7 +9,6 @@ public class GameBoard {
     private int level;
     private int linesCleared;
 
-    // Constructor sans argument
     public GameBoard() {
         this(20, 10);
     }

@@ -2,10 +2,10 @@
 package fr.asser.tetris.model;
 
 public class Tetromino {
-    private int[][] shape;
+    protected int[][] shape;
     private int x;
     private int y;
-    private String type;
+    protected String type;
     private int rotationIndex;
 
     private static final String[] TYPES = {"I", "J", "L", "O", "S", "T", "Z"};

@@ -65,47 +65,15 @@ public class TetrisService {
     }
 
     public void lockTetromino() {
-        int[][] shape = currentTetromino.getShape();
-        int x = currentTetromino.getX();
-        int y = currentTetromino.getY();
+        gameBoard.placeTetromino(currentTetromino);
 
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    gameBoard.getBoard()[y + i][x + j] = shape[i][j];
-                }
-            }
-        }
-
-        if (y < 0) {
+        if (currentTetromino.getY() < 0) {
             gameOver = true;
         }
     }
 
     public void clearLines() {
-        int[][] board = gameBoard.getBoard();
-        for (int i = 0; i < board.length; i++) {
-            if (isLineComplete(board[i])) {
-                clearLine(i);
-            }
-        }
-    }
-
-    private boolean isLineComplete(int[] line) {
-        for (int cell : line) {
-            if (cell == 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void clearLine(int lineIndex) {
-        int[][] board = gameBoard.getBoard();
-        for (int k = lineIndex; k > 0; k--) {
-            board[k] = board[k - 1];
-        }
-        board[0] = new int[board[0].length];
+        gameBoard.clearLines();
     }
 
     public void generateNewTetromino() {
@@ -116,27 +84,7 @@ public class TetrisService {
     }
 
     public boolean checkCollision(int x, int y) {
-        int[][] shape = currentTetromino.getShape();
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != 0) {
-                    int newX = x + j;
-                    int newY = y + i;
-                    if (isOutOfBounds(newX, newY) || isOccupied(newX, newY)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isOutOfBounds(int x, int y) {
-        return x < 0 || x >= gameBoard.getBoard()[0].length || y >= gameBoard.getBoard().length;
-    }
-
-    private boolean isOccupied(int x, int y) {
-        return y >= 0 && gameBoard.getBoard()[y][x] != 0;
+        return !gameBoard.canPlaceTetromino(new TetrominoWrapper(currentTetromino, x, y));
     }
 
     public void restartGame() {
@@ -144,5 +92,15 @@ public class TetrisService {
         gameBoard = new GameBoard();
         currentTetromino = new Tetromino();
         gameOver = false;
+    }
+
+    private static class TetrominoWrapper extends Tetromino {
+        TetrominoWrapper(Tetromino tetromino, int x, int y) {
+            super();
+            this.setX(x);
+            this.setY(y);
+            this.shape = tetromino.getShape();
+            this.type = tetromino.getType();
+        }
     }
 }
