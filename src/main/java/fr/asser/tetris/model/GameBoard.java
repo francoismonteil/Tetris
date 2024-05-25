@@ -72,7 +72,7 @@ public class GameBoard {
             if (isLineComplete(i)) {
                 clearLine(i);
                 linesClearedInThisStep++;
-                i++;  // Recheck the same line after clearing
+                i++;
             }
         }
 
@@ -104,12 +104,13 @@ public class GameBoard {
     }
 
     private int calculateScore(int lines) {
-        return switch (lines) {
+        int baseScore = switch (lines) {
             case 1 -> 100;
             case 2 -> 300;
             case 3 -> 500;
             case 4 -> 800;
             default -> 0;
         };
+        return baseScore * level;
     }
 }

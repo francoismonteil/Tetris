@@ -7,6 +7,7 @@ export class GameState {
         this.isGameStarted = false;
         this.dropInterval = 1000;
         this.dropTimeout = null;
+        this.isPaused = false;
     }
 
     async fetchInitialGameState() {
@@ -41,6 +42,22 @@ export class GameState {
         } else {
             this.resetDropInterval(newGameState.level);
         }
+    }
+
+    updateUI(state) {
+        const scoreElem = document.getElementById('score');
+        const levelElem = document.getElementById('level');
+        const controlsElem = document.getElementById('controls');
+        const gameOverElem = document.getElementById('game-over');
+
+        scoreElem.textContent = state.score;
+        levelElem.textContent = state.level;
+        controlsElem.style.display = state.gameOver ? 'none' : 'block';
+        gameOverElem.style.display = state.gameOver ? 'block' : 'none';
+    }
+
+    handleGameOver() {
+        clearTimeout(this.dropTimeout);
     }
 
     async sendAction(action, sound) {
@@ -88,27 +105,13 @@ export class GameState {
     resetDropInterval(level) {
         clearTimeout(this.dropTimeout);
         this.dropInterval = Math.max(1000 - (level - 1) * 100, 100);
-        this.dropTimeout = setTimeout(() => this.dropPiece(), this.dropInterval);
-    }
-
-    handleGameOver() {
-        clearTimeout(this.dropTimeout);
-    }
-
-    updateUI(state) {
-        const scoreElem = document.getElementById('score');
-        const levelElem = document.getElementById('level');
-        const controlsElem = document.getElementById('controls');
-        const gameOverElem = document.getElementById('game-over');
-
-        scoreElem.textContent = state.score;
-        levelElem.textContent = state.level;
-        controlsElem.style.display = state.gameOver ? 'none' : 'block';
-        gameOverElem.style.display = state.gameOver ? 'block' : 'none';
+        if (!this.isPaused) {
+            this.dropTimeout = setTimeout(() => this.dropPiece(), this.dropInterval);
+        }
     }
 
     dropPiece() {
-        if (!this.isLocked && this.gameState.currentTetromino) {
+        if (!this.isLocked && this.gameState.currentTetromino && !this.isPaused) {
             window.moveDown();
         }
         this.dropTimeout = setTimeout(() => this.dropPiece(), this.dropInterval);
