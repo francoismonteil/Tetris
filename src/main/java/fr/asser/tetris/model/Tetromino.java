@@ -1,4 +1,3 @@
-// src/main/java/fr/asser/tetris/model/Tetromino.java
 package fr.asser.tetris.model;
 
 public class Tetromino {

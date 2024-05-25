@@ -1,4 +1,3 @@
-// src/main/java/fr/asser/tetris/TetrisService.java
 package fr.asser.tetris;
 
 import fr.asser.tetris.model.GameBoard;

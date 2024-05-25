@@ -9,5 +9,4 @@ public class TetrisApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TetrisApplication.class, args);
 	}
-
 }

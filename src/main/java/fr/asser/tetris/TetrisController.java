@@ -1,4 +1,3 @@
-// src/main/java/fr/asser/tetris/TetrisController.java
 package fr.asser.tetris;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

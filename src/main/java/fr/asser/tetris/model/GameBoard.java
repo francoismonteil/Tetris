@@ -1,10 +1,9 @@
-// src/main/java/fr/asser/tetris/model/GameBoard.java
 package fr.asser.tetris.model;
 
 public class GameBoard {
-    private int[][] board;
-    private int rows;
-    private int cols;
+    private final int[][] board;
+    private final int rows;
+    private final int cols;
     private int score;
     private int level;
     private int linesCleared;
