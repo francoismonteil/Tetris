@@ -2,6 +2,7 @@
 package fr.asser.tetris;
 
 import fr.asser.tetris.model.Tetromino;
+import fr.asser.tetris.service.TetrisService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.BeforeEach;

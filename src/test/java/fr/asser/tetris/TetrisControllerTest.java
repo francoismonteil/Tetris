@@ -2,8 +2,10 @@
 package fr.asser.tetris;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.asser.tetris.controller.TetrisController;
 import fr.asser.tetris.model.GameBoard;
 import fr.asser.tetris.model.Tetromino;
+import fr.asser.tetris.service.TetrisService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.when;
