@@ -1,7 +1,3 @@
-Voici la mise à jour du README pour refléter les nouvelles emplacements des fichiers `TetrisController` et `TetrisService` dans les répertoires `controller` et `service`, respectivement.
-
----
-
 # Tetris Game
 
 ## Description
