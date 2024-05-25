@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     await preloadImages();
 
     const gameState = new GameState();
+    gameState.isPaused = false;
     const renderer = new Renderer(canvasId, images, blockSize);
     const controls = new Controls(gameState, sounds);
 
@@ -65,6 +66,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     window.moveRight = controls.moveRight.bind(controls);
     window.rotate = controls.rotate.bind(controls);
     window.toggleMusic = controls.toggleMusic.bind(controls);
+    window.togglePause = controls.togglePause.bind(controls);
 
     window.restartGame = async function() {
         try {
@@ -78,4 +80,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             console.error("Error restarting game:", error);
         }
     };
+
+    document.getElementById('toggle-music').addEventListener('click', window.toggleMusic);
 });

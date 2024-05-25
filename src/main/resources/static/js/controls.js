@@ -2,7 +2,7 @@ export class Controls {
     constructor(gameState, sounds) {
         this.gameState = gameState;
         this.sounds = sounds;
-        this.isMuted = false; // Ajoutez une variable pour suivre l'état muet
+        this.isMuted = false;
     }
 
     setupEventListeners() {
@@ -24,12 +24,18 @@ export class Controls {
                 case "ArrowUp":
                     this.rotate();
                     break;
+                case "p":
+                case "P":
+                    this.togglePause();
+                    break;
             }
         });
+
+        document.getElementById('toggle-music').addEventListener('click', this.toggleMusic.bind(this));
     }
 
     async moveDown() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino) return;
+        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
         const targetY = this.gameState.gameState.currentTetromino.y + 1;
         if (!this.gameState.checkCollision({ ...this.gameState.gameState.currentTetromino, y: targetY }, this.gameState.gameState.gameBoard)) {
             this.gameState.gameState.currentTetromino.y = targetY;
@@ -43,7 +49,7 @@ export class Controls {
     }
 
     async moveLeft() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino) return;
+        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
         const targetX = this.gameState.gameState.currentTetromino.x - 1;
         if (!this.gameState.checkCollision({ ...this.gameState.gameState.currentTetromino, x: targetX }, this.gameState.gameState.gameBoard)) {
             this.gameState.gameState.currentTetromino.x = targetX;
@@ -53,7 +59,7 @@ export class Controls {
     }
 
     async moveRight() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino) return;
+        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
         const targetX = this.gameState.gameState.currentTetromino.x + 1;
         if (!this.gameState.checkCollision({ ...this.gameState.gameState.currentTetromino, x: targetX }, this.gameState.gameState.gameBoard)) {
             this.gameState.gameState.currentTetromino.x = targetX;
@@ -63,7 +69,7 @@ export class Controls {
     }
 
     async rotate() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino) return;
+        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
         const originalShape = this.gameState.gameState.currentTetromino.shape;
         this.gameState.gameState.currentTetromino.rotate();
         if (this.gameState.checkCollision(this.gameState.gameState.currentTetromino, this.gameState.gameState.gameBoard)) {
@@ -74,17 +80,26 @@ export class Controls {
     }
 
     toggleMusic() {
-        this.isMuted = !this.isMuted; // Inverser l'état muet
+        this.isMuted = !this.isMuted;
         const toggleMusicButton = document.getElementById('toggle-music');
-        console.log("toggleMusic called. isMuted:", this.isMuted); // Débogage
         if (this.isMuted) {
-            console.log("Muting music"); // Débogage
             this.sounds.backgroundMusic.pause();
             toggleMusicButton.textContent = 'Unmute Music';
         } else {
-            console.log("Unmuting music"); // Débogage
             this.sounds.backgroundMusic.play();
             toggleMusicButton.textContent = 'Mute Music';
+        }
+    }
+
+    togglePause() {
+        this.gameState.isPaused = !this.gameState.isPaused;
+        const togglePauseButton = document.querySelector("button[onclick='togglePause()']");
+        if (this.gameState.isPaused) {
+            clearTimeout(this.gameState.dropTimeout);
+            togglePauseButton.textContent = 'Resume';
+        } else {
+            this.gameState.resetDropInterval(this.gameState.gameState.level);
+            togglePauseButton.textContent = 'Pause';
         }
     }
 }

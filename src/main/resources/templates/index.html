@@ -3,7 +3,6 @@
 <head>
     <title>Tetris</title>
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <!-- Charger le script principal en tant que module -->
     <script type="module" src="/js/main.js" defer></script>
 </head>
 <body>
@@ -27,6 +26,7 @@
         <button type="button" onclick="rotate()">Rotate</button>
         <button type="button" id="toggle-music" onclick="toggleMusic()">Mute Music</button>
         <button type="button" onclick="restartGame()">Restart</button>
+        <button type="button" onclick="togglePause()">Pause</button>
     </div>
     <div id="game-over" style="display: none;">
         <p>Game Over!</p>
