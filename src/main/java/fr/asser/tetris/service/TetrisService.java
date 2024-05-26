@@ -126,8 +126,8 @@ public class TetrisService {
             super();
             this.setX(x);
             this.setY(y);
-            this.shape = tetromino.getShape();
-            this.type = tetromino.getType();
+            this.setShape(tetromino.getShape());
+            this.setType(tetromino.getType());
         }
     }
 }

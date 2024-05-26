@@ -1,37 +1,36 @@
 package fr.asser.tetris.model;
 
 public class Tetromino {
-    protected int[][] shape;
+    private int[][] shape;
     private int x;
     private int y;
-    protected String type;
-    private int rotationIndex;
+    private String type;
 
     private static final String[] TYPES = {"I", "J", "L", "O", "S", "T", "Z"};
     private static final int[][][] SHAPES = {
-            {{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-            {{1, 0, 0}, {1, 1, 1}, {0, 0, 0}},
-            {{0, 0, 1}, {1, 1, 1}, {0, 0, 0}},
-            {{1, 1}, {1, 1}},
-            {{0, 1, 1}, {1, 1, 0}, {0, 0, 0}},
-            {{0, 1, 0}, {1, 1, 1}, {0, 0, 0}},
-            {{1, 1, 0}, {0, 1, 1}, {0, 0, 0}}
+            {{1, 1, 1, 1}}, // I
+            {{1, 0, 0}, {1, 1, 1}}, // J
+            {{0, 0, 1}, {1, 1, 1}}, // L
+            {{1, 1}, {1, 1}}, // O
+            {{0, 1, 1}, {1, 1, 0}}, // S
+            {{0, 1, 0}, {1, 1, 1}}, // T
+            {{1, 1, 0}, {0, 1, 1}} // Z
     };
 
-    private static final int INITIAL_X = 3;
-    private static final int INITIAL_Y = 0;
-
     public Tetromino() {
-        this.rotationIndex = 0;
         int typeIndex = (int) (Math.random() * SHAPES.length);
         this.shape = SHAPES[typeIndex];
         this.type = TYPES[typeIndex];
-        this.x = INITIAL_X;
-        this.y = INITIAL_Y;
+        this.x = 3;
+        this.y = 0;
     }
 
     public int[][] getShape() {
         return shape;
+    }
+
+    public void setShape(int[][] shape) {
+        this.shape = shape;
     }
 
     public int getX() {
@@ -54,6 +53,8 @@ public class Tetromino {
         return type;
     }
 
+    public void setType(String type) {}
+
     public void rotate() {
         shape = rotateMatrix(shape);
     }
@@ -63,22 +64,24 @@ public class Tetromino {
     }
 
     private int[][] rotateMatrix(int[][] matrix) {
-        int n = matrix.length;
-        int[][] rotatedMatrix = new int[n][n];
-        for (int i = 0; i < n; i++) {
+        int m = matrix.length;
+        int n = matrix[0].length;
+        int[][] rotatedMatrix = new int[n][m];
+        for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                rotatedMatrix[j][n - 1 - i] = matrix[i][j];
+                rotatedMatrix[j][m - 1 - i] = matrix[i][j];
             }
         }
         return rotatedMatrix;
     }
 
     private int[][] rotateMatrixCounterClockwise(int[][] matrix) {
-        int n = matrix.length;
-        int[][] rotatedMatrix = new int[n][n];
-        for (int i = 0; i < n; i++) {
+        int m = matrix.length;
+        int n = matrix[0].length;
+        int[][] rotatedMatrix = new int[n][m];
+        for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                rotatedMatrix[i][j] = matrix[j][n - 1 - i];
+                rotatedMatrix[n - 1 - j][i] = matrix[i][j];
             }
         }
         return rotatedMatrix;

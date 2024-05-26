@@ -45,15 +45,10 @@ export class GameState {
     }
 
     updateUI(state) {
-        const scoreElem = document.getElementById('score');
-        const levelElem = document.getElementById('level');
-        const controlsElem = document.getElementById('controls');
-        const gameOverElem = document.getElementById('game-over');
-
-        scoreElem.textContent = state.score;
-        levelElem.textContent = state.level;
-        controlsElem.style.display = state.gameOver ? 'none' : 'block';
-        gameOverElem.style.display = state.gameOver ? 'block' : 'none';
+        document.getElementById('score').textContent = state.score;
+        document.getElementById('level').textContent = state.level;
+        document.getElementById('controls').style.display = state.gameOver ? 'none' : 'block';
+        document.getElementById('game-over').style.display = state.gameOver ? 'block' : 'none';
     }
 
     handleGameOver() {

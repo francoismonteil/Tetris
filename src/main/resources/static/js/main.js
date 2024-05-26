@@ -23,9 +23,8 @@ document.addEventListener("DOMContentLoaded", async function() {
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.src = `/images/${type}.png`;
-                img.onload = resolve;
+                img.onload = () => resolve(images[type] = img);
                 img.onerror = reject;
-                images[type] = img;
             });
         }));
     }
