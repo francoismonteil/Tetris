@@ -5,13 +5,29 @@ services:
     image: postgres:latest
     container_name: postgres_db
     environment:
+      POSTGRES_DB: mydatabase
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tetris_network
+
+  app:
+    image: vps-c4ecf5f1.vps.ovh.net:5000/tetris:1.0.0
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydatabase?currentSchema=tetris
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: mypassword
+    depends_on:
+      - postgres
+    networks:
+      - tetris_network
 
 volumes:
   postgres_data:
+
+networks:
+  tetris_network:
