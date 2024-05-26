@@ -5,6 +5,10 @@ export class Controls {
         this.isMuted = false;
     }
 
+    setGameState(gameState) {
+        this.gameState = gameState;
+    }
+
     setupEventListeners() {
         document.addEventListener("keydown", (event) => {
             if (document.getElementById('game-over').style.display === 'block') {

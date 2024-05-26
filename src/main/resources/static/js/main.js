@@ -1,6 +1,7 @@
 import { GameState } from './gameState.js';
 import { Renderer } from './renderer.js';
 import { Controls } from './controls.js';
+import { submitScore } from './highScores.js';
 
 document.addEventListener("DOMContentLoaded", async function() {
     const canvasId = 'game-board';
@@ -50,13 +51,20 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     };
 
+    gameState.handleGameOver = async function() {
+        clearTimeout(this.dropTimeout);
+        document.getElementById('final-score').textContent = this.gameState.score;
+        document.getElementById('high-score-modal').style.display = 'block';
+    };
+
     controls.setupEventListeners();
 
-    window.startGame = function() {
+    window.startGame = async function() {
         if (!gameState.isGameStarted) {
             gameState.isGameStarted = true;
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-container').style.display = 'block';
+            await restartGame();
             gameState.fetchInitialGameState();
             gameState.dropPiece();
         }
@@ -85,4 +93,29 @@ document.addEventListener("DOMContentLoaded", async function() {
     };
 
     document.getElementById('toggle-music').addEventListener('click', window.toggleMusic);
+
+    const modal = document.getElementById('high-score-modal');
+    const closeBtn = document.getElementsByClassName('close')[0];
+
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    };
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    document.getElementById('high-score-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const playerName = document.getElementById('player-name').value;
+        await submitScore(playerName, gameState.gameState.score);
+        window.location.href = '/scores';
+    });
+
+    document.getElementById('back-to-game').addEventListener('click', async function() {
+        await restartGame();
+        window.location.href = '/';
+    });
 });

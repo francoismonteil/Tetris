@@ -47,15 +47,11 @@ public class GameBoard {
     }
 
     public boolean canPlaceTetromino(Tetromino tetromino) {
-        int[][] shape = tetromino.getShape();
-        int x = tetromino.getX();
-        int y = tetromino.getY();
-
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[0].length; j++) {
-                if (shape[i][j] != 0) {
-                    int newX = x + j;
-                    int newY = y + i;
+        for (int i = 0; i < tetromino.getShape().length; i++) {
+            for (int j = 0; j < tetromino.getShape()[0].length; j++) {
+                if (tetromino.getShape()[i][j] != 0) {
+                    int newX = tetromino.getX() + j;
+                    int newY = tetromino.getY() + i;
                     if (isOutOfBounds(newX, newY) || board[newY][newX] != 0) {
                         return false;
                     }
@@ -66,34 +62,25 @@ public class GameBoard {
     }
 
     public void placeTetromino(Tetromino tetromino) {
-        int[][] shape = tetromino.getShape();
-        int x = tetromino.getX();
-        int y = tetromino.getY();
-
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[0].length; j++) {
-                if (shape[i][j] != 0) {
-                    board[y + i][x + j] = shape[i][j];
+        for (int i = 0; i < tetromino.getShape().length; i++) {
+            for (int j = 0; j < tetromino.getShape()[0].length; j++) {
+                if (tetromino.getShape()[i][j] != 0) {
+                    board[tetromino.getY() + i][tetromino.getX() + j] = tetromino.getShape()[i][j];
                 }
             }
         }
     }
 
     public void clearLines() {
-        int linesClearedInThisStep = 0;
+        int clearedLines = 0;
         for (int i = rows - 1; i >= 0; i--) {
             if (isLineComplete(i)) {
                 clearLine(i);
-                linesClearedInThisStep++;
+                clearedLines++;
                 i++;
             }
         }
-
-        if (linesClearedInThisStep > 0) {
-            linesCleared += linesClearedInThisStep;
-            score += calculateScore(linesClearedInThisStep);
-            level = score / 100 + 1;
-        }
+        updateScoreAndLevel(clearedLines);
     }
 
     private boolean isOutOfBounds(int x, int y) {
@@ -110,20 +97,25 @@ public class GameBoard {
     }
 
     private void clearLine(int row) {
-        for (int k = row; k > 0; k--) {
-            board[k] = board[k - 1];
-        }
+        System.arraycopy(board, 0, board, 1, row);
         board[0] = new int[cols];
     }
 
+    private void updateScoreAndLevel(int clearedLines) {
+        if (clearedLines > 0) {
+            linesCleared += clearedLines;
+            score += calculateScore(clearedLines);
+            level = score / 100 + 1;
+        }
+    }
+
     private int calculateScore(int lines) {
-        int baseScore = switch (lines) {
+        return switch (lines) {
             case 1 -> 100;
             case 2 -> 300;
             case 3 -> 500;
             case 4 -> 800;
             default -> 0;
-        };
-        return baseScore * level;
+        } * level;
     }
 }

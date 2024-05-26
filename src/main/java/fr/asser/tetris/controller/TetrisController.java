@@ -7,14 +7,10 @@ import fr.asser.tetris.model.Tetromino;
 import fr.asser.tetris.service.TetrisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class TetrisController {
-
     @Autowired
     private TetrisService tetrisService;
 
@@ -85,7 +81,7 @@ public class TetrisController {
             GameState gameState = objectMapper.readValue(savedState, GameState.class);
             tetrisService.setGameBoard(new GameBoard(gameState.gameBoard, gameState.score, gameState.level, gameState.linesCleared));
             tetrisService.setCurrentTetromino(gameState.currentTetromino);
-            tetrisService.setNextTetromino(gameState.nextTetromino); // Ajout de la restauration du prochain tétrimino
+            tetrisService.setNextTetromino(gameState.nextTetromino);
             tetrisService.setGameOver(gameState.gameOver);
             return getCurrentGameState();
         } catch (JsonProcessingException e) {
@@ -103,7 +99,7 @@ public class TetrisController {
             return objectMapper.writeValueAsString(new GameState(
                     tetrisService.getGameBoard().getBoard(),
                     tetrisService.getCurrentTetromino(),
-                    tetrisService.getNextTetromino(), // Ajout du prochain tétrimino
+                    tetrisService.getNextTetromino(),
                     tetrisService.getGameBoard().getScore(),
                     tetrisService.getGameBoard().getLevel(),
                     tetrisService.getGameBoard().getLinesCleared(),
@@ -117,7 +113,7 @@ public class TetrisController {
     private static class GameState {
         public int[][] gameBoard;
         public Tetromino currentTetromino;
-        public Tetromino nextTetromino; // Ajout du prochain tétrimino
+        public Tetromino nextTetromino;
         public int score;
         public int level;
         public int linesCleared;

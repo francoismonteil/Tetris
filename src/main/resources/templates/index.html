@@ -39,5 +39,19 @@
         <button type="button" onclick="restartGame()">Restart</button>
     </div>
 </div>
+
+<!-- Modal for submitting high score -->
+<div id="high-score-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Game Over!</h2>
+        <p>Your Score: <span id="final-score"></span></p>
+        <form id="high-score-form">
+            <label for="player-name">Enter your name:</label>
+            <input type="text" id="player-name" name="player-name" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>

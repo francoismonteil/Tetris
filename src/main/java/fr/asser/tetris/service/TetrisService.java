@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TetrisService {
-
     private static final Logger logger = LoggerFactory.getLogger(TetrisService.class);
 
     private GameBoard gameBoard;
@@ -91,7 +90,6 @@ public class TetrisService {
     public void lockTetromino() {
         logger.info("Locking tetromino");
         gameBoard.placeTetromino(currentTetromino);
-
         if (currentTetromino.getY() < 0) {
             gameOver = true;
         }
