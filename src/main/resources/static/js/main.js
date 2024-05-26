@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         this.gameState = newGameState;
         this.isLocked = false;
         renderer.drawBoard(this.gameState.gameBoard, this.gameState.currentTetromino);
+        renderer.drawNextPiece(this.gameState.nextTetromino);
         this.updateUI(newGameState);
         if (newGameState.gameOver) {
             this.handleGameOver();

@@ -13,6 +13,7 @@ public class TetrisService {
 
     private GameBoard gameBoard;
     private Tetromino currentTetromino;
+    private Tetromino nextTetromino;
     private boolean gameOver;
 
     public TetrisService() {
@@ -27,6 +28,10 @@ public class TetrisService {
         return currentTetromino;
     }
 
+    public Tetromino getNextTetromino() {
+        return nextTetromino;
+    }
+
     public boolean isGameOver() {
         return gameOver;
     }
@@ -37,6 +42,10 @@ public class TetrisService {
 
     public void setCurrentTetromino(Tetromino currentTetromino) {
         this.currentTetromino = currentTetromino;
+    }
+
+    public void setNextTetromino(Tetromino nextTetromino) {
+        this.nextTetromino = nextTetromino;
     }
 
     public void setGameOver(boolean gameOver) {
@@ -95,7 +104,8 @@ public class TetrisService {
 
     public void generateNewTetromino() {
         logger.info("Generating new tetromino");
-        currentTetromino = new Tetromino();
+        currentTetromino = nextTetromino != null ? nextTetromino : new Tetromino();
+        nextTetromino = new Tetromino();
         if (checkCollision(currentTetromino.getX(), currentTetromino.getY())) {
             gameOver = true;
         }
@@ -109,6 +119,7 @@ public class TetrisService {
         logger.info("Restarting game");
         gameBoard = new GameBoard();
         currentTetromino = new Tetromino();
+        nextTetromino = new Tetromino();
         gameOver = false;
     }
 
