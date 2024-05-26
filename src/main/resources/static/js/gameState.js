@@ -6,7 +6,9 @@ export class GameState {
         this.isLocked = false;
         this.isGameStarted = false;
         this.dropInterval = 1000;
-        this.dropTimeout = null;
+        this.dropCounter = 0;
+        this.lastTime = 0;
+        this.animationFrameId = null;
         this.isPaused = false;
     }
 
@@ -40,7 +42,7 @@ export class GameState {
         if (newGameState.gameOver) {
             this.handleGameOver();
         } else {
-            this.resetDropInterval(newGameState.level);
+            this.startDropInterval();
         }
     }
 
@@ -52,7 +54,7 @@ export class GameState {
     }
 
     handleGameOver() {
-        clearTimeout(this.dropTimeout);
+        cancelAnimationFrame(this.animationFrameId);
     }
 
     async sendAction(action, sound) {
@@ -98,17 +100,37 @@ export class GameState {
     }
 
     resetDropInterval(level) {
-        clearTimeout(this.dropTimeout);
         this.dropInterval = Math.max(1000 - (level - 1) * 100, 100);
         if (!this.isPaused) {
-            this.dropTimeout = setTimeout(() => this.dropPiece(), this.dropInterval);
+            this.startDropInterval();
         }
     }
 
+    startDropInterval() {
+        const update = (time = 0) => {
+            const deltaTime = time - this.lastTime;
+            this.lastTime = time;
+            this.dropCounter += deltaTime;
+
+            if (this.dropCounter > this.dropInterval) {
+                this.dropPiece();
+                this.dropCounter = 0;
+            }
+
+            if (!this.isPaused && !this.isLocked && this.gameState.currentTetromino) {
+                this.animationFrameId = requestAnimationFrame(update);
+            }
+        };
+        this.animationFrameId = requestAnimationFrame(update);
+    }
+
     dropPiece() {
-        if (!this.isLocked && this.gameState.currentTetromino && !this.isPaused) {
+        if (!this.isActionPrevented()) {
             window.moveDown();
         }
-        this.dropTimeout = setTimeout(() => this.dropPiece(), this.dropInterval);
+    }
+
+    isActionPrevented() {
+        return this.isLocked || !this.isGameStarted || !this.gameState.currentTetromino || this.isPaused;
     }
 }

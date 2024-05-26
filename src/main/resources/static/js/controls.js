@@ -3,6 +3,10 @@ export class Controls {
         this.gameState = gameState;
         this.sounds = sounds;
         this.isMuted = false;
+        this.keyStates = {};
+        this.keyRepeatTimers = {};
+        this.keyRepeatDelay = 150; // Initial delay before repeating (in ms)
+        this.keyRepeatInterval = 50; // Interval for continuous repeat (in ms)
     }
 
     setupEventListeners() {
@@ -11,35 +15,85 @@ export class Controls {
                 return;
             }
 
+            if (!this.keyStates[event.key]) {
+                this.keyStates[event.key] = true;
+                this.handleKeyDown(event.key);
+            }
+
             switch (event.key) {
                 case "ArrowDown":
-                    this.moveDown();
-                    break;
                 case "ArrowLeft":
-                    this.moveLeft();
-                    break;
                 case "ArrowRight":
-                    this.moveRight();
-                    break;
                 case "ArrowUp":
-                    this.rotate();
-                    break;
                 case "p":
                 case "P":
-                    this.togglePause();
-                    break;
                 case "s":
                 case "S":
-                    this.saveGame();
-                    break;
                 case "l":
                 case "L":
-                    this.loadGame();
+                    event.preventDefault();
                     break;
             }
         });
 
+        document.addEventListener("keyup", (event) => {
+            this.keyStates[event.key] = false;
+            clearTimeout(this.keyRepeatTimers[event.key]);
+            delete this.keyRepeatTimers[event.key];
+        });
+
         document.getElementById('toggle-music').addEventListener('click', this.toggleMusic.bind(this));
+    }
+
+    handleKeyDown(key) {
+        if (!this.isActionPrevented()) {
+            this.executeAction(key);
+            this.keyRepeatTimers[key] = setTimeout(() => {
+                this.repeatKeyAction(key);
+            }, this.keyRepeatDelay);
+        }
+    }
+
+    repeatKeyAction(key) {
+        if (this.keyStates[key]) {
+            this.executeAction(key);
+            this.keyRepeatTimers[key] = setInterval(() => {
+                if (this.keyStates[key]) {
+                    this.executeAction(key);
+                } else {
+                    clearInterval(this.keyRepeatTimers[key]);
+                }
+            }, this.keyRepeatInterval);
+        }
+    }
+
+    executeAction(key) {
+        switch (key) {
+            case "ArrowDown":
+                this.moveDown();
+                break;
+            case "ArrowLeft":
+                this.moveLeft();
+                break;
+            case "ArrowRight":
+                this.moveRight();
+                break;
+            case "ArrowUp":
+                this.rotate();
+                break;
+            case "p":
+            case "P":
+                this.togglePause();
+                break;
+            case "s":
+            case "S":
+                this.saveGame();
+                break;
+            case "l":
+            case "L":
+                this.loadGame();
+                break;
+        }
     }
 
     async moveDown() {
@@ -103,7 +157,7 @@ export class Controls {
         this.gameState.isPaused = !this.gameState.isPaused;
         const togglePauseButton = document.querySelector("button[onclick='togglePause()']");
         if (this.gameState.isPaused) {
-            clearTimeout(this.gameState.dropTimeout);
+            cancelAnimationFrame(this.gameState.animationFrameId);
             togglePauseButton.textContent = 'Resume';
         } else {
             this.gameState.resetDropInterval(this.gameState.gameState.level);
