@@ -1,4 +1,6 @@
-# Tetris Game
+# Spring Tetris Game
+
+![Spring tetris.webp](src%2Fmain%2Fresources%2Fstatic%2Fimages%2FSpring%20tetris.webp)
 
 ## Description
 
