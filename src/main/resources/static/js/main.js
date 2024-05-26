@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     await preloadImages();
 
     const gameState = new GameState();
-    gameState.isPaused = false;
     const renderer = new Renderer(canvasId, images, blockSize);
     const controls = new Controls(gameState, sounds);
 
@@ -101,7 +100,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     };
 
     window.onclick = function(event) {
-        if (event.target == modal) {
+        if (event.target === modal) {
             modal.style.display = 'none';
         }
     };

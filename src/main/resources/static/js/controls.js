@@ -5,10 +5,6 @@ export class Controls {
         this.isMuted = false;
     }
 
-    setGameState(gameState) {
-        this.gameState = gameState;
-    }
-
     setupEventListeners() {
         document.addEventListener("keydown", (event) => {
             if (document.getElementById('game-over').style.display === 'block') {
@@ -47,7 +43,7 @@ export class Controls {
     }
 
     async moveDown() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
+        if (this.isActionPrevented()) return;
         const targetY = this.gameState.gameState.currentTetromino.y + 1;
         if (!this.gameState.checkCollision({ ...this.gameState.gameState.currentTetromino, y: targetY }, this.gameState.gameState.gameBoard)) {
             this.gameState.gameState.currentTetromino.y = targetY;
@@ -61,7 +57,7 @@ export class Controls {
     }
 
     async moveLeft() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
+        if (this.isActionPrevented()) return;
         const targetX = this.gameState.gameState.currentTetromino.x - 1;
         if (!this.gameState.checkCollision({ ...this.gameState.gameState.currentTetromino, x: targetX }, this.gameState.gameState.gameBoard)) {
             this.gameState.gameState.currentTetromino.x = targetX;
@@ -71,7 +67,7 @@ export class Controls {
     }
 
     async moveRight() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
+        if (this.isActionPrevented()) return;
         const targetX = this.gameState.gameState.currentTetromino.x + 1;
         if (!this.gameState.checkCollision({ ...this.gameState.gameState.currentTetromino, x: targetX }, this.gameState.gameState.gameBoard)) {
             this.gameState.gameState.currentTetromino.x = targetX;
@@ -81,7 +77,7 @@ export class Controls {
     }
 
     async rotate() {
-        if (this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused) return;
+        if (this.isActionPrevented()) return;
         const originalShape = this.gameState.gameState.currentTetromino.shape;
         this.gameState.gameState.currentTetromino.rotate();
         if (this.gameState.checkCollision(this.gameState.gameState.currentTetromino, this.gameState.gameState.gameBoard)) {
@@ -148,5 +144,9 @@ export class Controls {
         } catch (error) {
             console.error("Error loading game:", error);
         }
+    }
+
+    isActionPrevented() {
+        return this.gameState.isLocked || !this.gameState.isGameStarted || !this.gameState.gameState.currentTetromino || this.gameState.isPaused;
     }
 }
