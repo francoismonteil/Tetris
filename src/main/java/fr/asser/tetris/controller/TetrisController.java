@@ -7,71 +7,74 @@ import fr.asser.tetris.model.Tetromino;
 import fr.asser.tetris.service.TetrisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class TetrisController {
+
     @Autowired
     private TetrisService tetrisService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @GetMapping("/")
-    public String index() {
-        return "index";
-    }
-
     @GetMapping("/gameState")
     @ResponseBody
     public String getGameState() {
-        return getCurrentGameState();
+        return serializeGameState();
     }
 
     @PostMapping("/moveDown")
     @ResponseBody
     public String moveDown() {
-        return handleGameAction(tetrisService::moveTetrominoDown);
+        tetrisService.moveTetrominoDown();
+        return serializeGameState();
     }
 
     @PostMapping("/moveLeft")
     @ResponseBody
     public String moveLeft() {
-        return handleGameAction(tetrisService::moveTetrominoLeft);
+        tetrisService.moveTetrominoLeft();
+        return serializeGameState();
     }
 
     @PostMapping("/moveRight")
     @ResponseBody
     public String moveRight() {
-        return handleGameAction(tetrisService::moveTetrominoRight);
+        tetrisService.moveTetrominoRight();
+        return serializeGameState();
     }
 
     @PostMapping("/rotate")
     @ResponseBody
     public String rotate() {
-        return handleGameAction(tetrisService::rotateTetromino);
+        tetrisService.rotateTetromino();
+        return serializeGameState();
     }
 
     @PostMapping("/lock")
     @ResponseBody
     public String lock() {
-        return handleGameAction(() -> {
-            tetrisService.lockTetromino();
-            tetrisService.clearLines();
-            tetrisService.generateNewTetromino();
-        });
+        tetrisService.lockTetromino();
+        tetrisService.clearLines();
+        tetrisService.generateNewTetromino();
+        return serializeGameState();
     }
 
     @PostMapping("/restart")
     @ResponseBody
     public String restart() {
-        return handleGameAction(tetrisService::restartGame);
+        tetrisService.restartGame();
+        return serializeGameState();
     }
 
     @PostMapping("/save")
     @ResponseBody
     public String saveGameState() {
-        return getCurrentGameState();
+        return serializeGameState();
     }
 
     @PostMapping("/load")
@@ -83,18 +86,13 @@ public class TetrisController {
             tetrisService.setCurrentTetromino(gameState.currentTetromino);
             tetrisService.setNextTetromino(gameState.nextTetromino);
             tetrisService.setGameOver(gameState.gameOver);
-            return getCurrentGameState();
+            return serializeGameState();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error processing JSON", e);
         }
     }
 
-    private String handleGameAction(Runnable gameAction) {
-        gameAction.run();
-        return getCurrentGameState();
-    }
-
-    private String getCurrentGameState() {
+    private String serializeGameState() {
         try {
             return objectMapper.writeValueAsString(new GameState(
                     tetrisService.getGameBoard().getBoard(),
