@@ -7,6 +7,7 @@ public class GameBoard {
     private int score;
     private int level;
     private int linesCleared;
+    private int linesToNextLevel;
 
     public GameBoard() {
         this(20, 10);
@@ -19,6 +20,7 @@ public class GameBoard {
         this.score = 0;
         this.level = 1;
         this.linesCleared = 0;
+        this.linesToNextLevel = 10;
     }
 
     public GameBoard(int[][] board, int score, int level, int linesCleared) {
@@ -28,6 +30,7 @@ public class GameBoard {
         this.score = score;
         this.level = level;
         this.linesCleared = linesCleared;
+        this.linesToNextLevel = 10;
     }
 
     public int[][] getBoard() {
@@ -105,7 +108,11 @@ public class GameBoard {
         if (clearedLines > 0) {
             linesCleared += clearedLines;
             score += calculateScore(clearedLines);
-            level = score / 100 + 1;
+            linesToNextLevel -= clearedLines;
+            if (linesToNextLevel <= 0) {
+                level++;
+                linesToNextLevel = 10 + (level - 1) * 5;
+            }
         }
     }
 
