@@ -1,7 +1,5 @@
 # Spring Tetris Game
 
-![Spring tetris.webp](src%2Fmain%2Fresources%2Fstatic%2Fimages%2FSpring%20tetris.webp)
-
 ## Description
 
 Ce projet est une implémentation du jeu Tetris utilisant Java pour le backend avec Spring Boot et JavaScript pour le frontend. Le jeu permet aux utilisateurs de jouer à Tetris, de mettre le jeu en pause, de sauvegarder leur progression et de charger une partie sauvegardée. Le niveau de difficulté augmente à mesure que le joueur progresse, augmentant la vitesse de chute des pièces et les points gagnés.

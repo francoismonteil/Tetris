@@ -35,22 +35,6 @@ public class TetrisService {
         return gameOver;
     }
 
-    public void setGameBoard(GameBoard gameBoard) {
-        this.gameBoard = gameBoard;
-    }
-
-    public void setCurrentTetromino(Tetromino currentTetromino) {
-        this.currentTetromino = currentTetromino;
-    }
-
-    public void setNextTetromino(Tetromino nextTetromino) {
-        this.nextTetromino = nextTetromino;
-    }
-
-    public void setGameOver(boolean gameOver) {
-        this.gameOver = gameOver;
-    }
-
     public void moveTetrominoDown() {
         logger.info("Moving tetromino down");
         if (!moveTetromino(currentTetromino.getX(), currentTetromino.getY() + 1)) {
@@ -121,6 +105,25 @@ public class TetrisService {
         gameOver = false;
     }
 
+    public GameState getCurrentGameState() {
+        return new GameState(
+                gameBoard.getBoard(),
+                currentTetromino,
+                nextTetromino,
+                gameBoard.getScore(),
+                gameBoard.getLevel(),
+                gameBoard.getLinesCleared(),
+                gameOver
+        );
+    }
+
+    public void loadGameState(GameState gameState) {
+        this.gameBoard = new GameBoard(gameState.gameBoard, gameState.score, gameState.level, gameState.linesCleared);
+        this.currentTetromino = gameState.currentTetromino;
+        this.nextTetromino = gameState.nextTetromino;
+        this.gameOver = gameState.gameOver;
+    }
+
     private static class TetrominoWrapper extends Tetromino {
         TetrominoWrapper(Tetromino tetromino, int x, int y) {
             super();
@@ -128,6 +131,26 @@ public class TetrisService {
             this.setY(y);
             this.setShape(tetromino.getShape());
             this.setType(tetromino.getType());
+        }
+    }
+
+    public static class GameState {
+        public int[][] gameBoard;
+        public Tetromino currentTetromino;
+        public Tetromino nextTetromino;
+        public int score;
+        public int level;
+        public int linesCleared;
+        public boolean gameOver;
+
+        public GameState(int[][] gameBoard, Tetromino currentTetromino, Tetromino nextTetromino, int score, int level, int linesCleared, boolean gameOver) {
+            this.gameBoard = gameBoard;
+            this.currentTetromino = currentTetromino;
+            this.nextTetromino = nextTetromino;
+            this.score = score;
+            this.level = level;
+            this.linesCleared = linesCleared;
+            this.gameOver = gameOver;
         }
     }
 }

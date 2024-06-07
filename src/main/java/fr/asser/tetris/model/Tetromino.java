@@ -53,7 +53,9 @@ public class Tetromino {
         return type;
     }
 
-    public void setType(String type) {}
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public void rotate() {
         shape = rotateMatrix(shape);
